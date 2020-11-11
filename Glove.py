@@ -132,8 +132,8 @@ class Glove:
                 for i in range(V):
                     # matrix = reg * np.eye(D) + np.sum((fX[i, j] * np.outer(U[j], U[i]) for j in range(V)), axis=0)
                     matrix = reg * np.eye(D) + (fX[i, :] * U.T).dot(U)
-                    vector = (fX[i, :] * (logX[i, :]) - b[i] - c - mu).dot(U)
-                    W[i] = np.linalg(matrix, vector)
+                    vector = (fX[i, :] * (logX[i, :] - b[i] - c - mu)).dot(U)
+                    W[i] = np.linalg.solve(matrix, vector)
 
                 # Update b
                 for i in range(V):
@@ -142,7 +142,20 @@ class Glove:
                     numerator = fX[i, :].dot(logX[i, :] - W[i].dot(U.T) - c - mu)
                     # for j in range(V):
                     #     numerator += fX[i, j] * (logX[i, j] - W[i].dot(U[j] - c[j]))
+                    b[i] = numerator / denominator
 
+                # Update U
+                for j in range(V):
+                    matrix = reg * np.eye(D) + (fX[:, j] * W.T).dot(W)
+                    vector = (fX[:, j] * (logX[:, j] - b - c[j] - mu)).dot(W)
+                    U[j] = np.linalg.solve(matrix, vector)
+
+                # Update c
+                for j in range(V):
+                    denominator = fX[:, j].sum() + reg
+                    assert(denominator > 0)
+                    numerator = fX[:, j].dot(logX[:, j] - W.dot(U[j]) - b - mu)
+                    c[j] = numerator / denominator
 
         self.W = W
         self.U = U
@@ -191,14 +204,15 @@ def main(we_file, w2i_file, use_brown=True, n_files=100):
     model.fit(sentences, cc_matrix, epochs=20)
 
     # Gradient descent method
-    model.fit(
-        sentences,
-        cc_matrix=cc_matrix,
-        learning_rate=1e-4,
-        reg=0.1,
-        epochs=500,
-        gd=True
-    )
+    # model.fit(
+    #     sentences,
+    #     cc_matrix=cc_matrix,
+    #     learning_rate=1e-4,
+    #     reg=0.1,
+    #     epochs=500,
+    #     gd=True
+    # )
+
     model.save(we_file)
 
 if __name__ == "__main__":
