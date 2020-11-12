@@ -66,7 +66,7 @@ def get_wikipedia_data(n_files, n_vocab, by_paragraph=False):
     prefix = 'Data/enwiki-preprocessed/'
     if not os.path.exists(prefix):
         print("Are you sure you've downloaded, converted, and placed the Wikipedia data into the proper folder?")
-        print("I'm looking for a folder called large_files, adjacent to the class folder, but it does not exist.")
+        print("I'm looking for a folder called Data/enwiki-preprocessed, adjacent to the rnn_class folder, but it does not exist.")
         print("Please download the data from https://dumps.wikimedia.org/")
         print("Quitting...")
         exit()
